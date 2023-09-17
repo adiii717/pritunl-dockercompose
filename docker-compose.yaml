@@ -1,0 +1,35 @@
+version: '3'
+
+services:
+  pritunl:
+    image: 'ghcr.io/jippi/docker-pritunl'
+    privileged: true
+    restart: always
+    ports:
+      - '80:80'
+      - '443:443'
+      - '1194:1194/udp'
+      - '1194:1194/tcp'
+    environment:
+      - PRITUNL_MONGODB_URI=mongodb://admin:adminpassword@mongo:27017/pritunl-zero?authSource=admin
+    volumes:
+      - 'staging_pritunl_data:/var/lib/pritunl'
+    depends_on:
+      - mongo
+
+  mongo:
+    image: 'mongo:7.0.1'
+    restart: always
+    environment:
+      - MONGO_INITDB_AUTH_MECHANISM=SCRAM-SHA-256
+      - MONGO_INITDB_DATABASE=pritunl-zero
+      - MONGO_INITDB_ROOT_USERNAME=admin
+      - MONGO_INITDB_ROOT_PASSWORD=adminpassword
+    volumes:
+      - 'staging_mongo_data:/data/db'
+
+volumes:
+  staging_pritunl_data:
+    driver: local
+  staging_mongo_data:
+    driver: local
